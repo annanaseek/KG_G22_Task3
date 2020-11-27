@@ -42,18 +42,12 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
 
     private void drawAll(LineDrawer ld) {
         drawAxes(ld);
-        /*for (Line q: allLines) {
-            drawLine(ld, q);
-        }
-        if (newLine != null) {
-            drawLine(ld, newLine);
-        }*/
 
         Parabola parabola = new Parabola(1, 0, 0);
-        parabola.draw(sc, ld);
+        drawFunction(parabola, ld);
 
 //        Sinusoid sinusoid = new Sinusoid(1, 1, 0, 0);
-//        sinusoid.draw(sc, ld);
+//        drawFunction(sinusoid, ld);
 
     }
 
@@ -62,42 +56,42 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
     }
 
     private void drawAxes(LineDrawer ld) {
-        double step = 0.5;
-        double hatchSize = 0.2;
-        Line xAxis = new Line(- sc.getRealW() / 2, 0, sc.getRealW(), 0);
-        Line yAxis = new Line(0, - sc.getRealH() / 2, 0, sc.getRealH());
+        double step = sc.getRealW() / 10;
+        double hatchSize = sc.getRealW() / sc.getScreenW() * 15;
+        Line xAxis = new Line(-sc.getRealW() / 2, 0, sc.getRealW(), 0);
+        Line yAxis = new Line(0, -sc.getRealH() / 2, 0, sc.getRealH());
         drawLine(ld, xAxis);
         drawLine(ld, yAxis);
-        for (double i = step; i < sc.getRealW() / 2; i+= step) {
-            RealPoint realPoint1 = new RealPoint(i, - hatchSize / 2);
-            RealPoint realPoint2 = new RealPoint(i,  hatchSize / 2);
+        for (double i = step; i < sc.getRealW() / 2; i += step) {
+            RealPoint realPoint1 = new RealPoint(i, -hatchSize / 2);
+            RealPoint realPoint2 = new RealPoint(i, hatchSize / 2);
             Line rightHatch = new Line(realPoint1, realPoint2);
 
             drawLine(ld, rightHatch);
-            drawString(new RealPoint(realPoint1.getX(), realPoint1.getY() - hatchSize / 2), String.valueOf(i));
+            drawString(new RealPoint(realPoint1.getX(), realPoint1.getY() - hatchSize), String.valueOf(Math.ceil(i * 1000) / 1000));
 
-            realPoint1 = new RealPoint(-i, - hatchSize / 2);
-            realPoint2 = new RealPoint(-i,  hatchSize / 2);
+            realPoint1 = new RealPoint(-i, -hatchSize / 2);
+            realPoint2 = new RealPoint(-i, hatchSize / 2);
             Line leftHatch = new Line(realPoint1, realPoint2);
 
             drawLine(ld, leftHatch);
-            drawString(new RealPoint(realPoint1.getX(), realPoint1.getY() - hatchSize / 2), String.valueOf(-i));
+            drawString(new RealPoint(realPoint1.getX(), realPoint1.getY() - hatchSize), String.valueOf(-Math.ceil(i * 1000) / 1000));
         }
 
-        for (double i = step; i < sc.getRealH() / 2; i+= step) {
-            RealPoint realPoint1 = new RealPoint(- hatchSize / 2, i);
-            RealPoint realPoint2 = new RealPoint( hatchSize / 2, i);
+        for (double i = step; i < sc.getRealH() / 2; i += step) {
+            RealPoint realPoint1 = new RealPoint(-hatchSize / 2, i);
+            RealPoint realPoint2 = new RealPoint(hatchSize / 2, i);
             Line upHatch = new Line(realPoint1, realPoint2);
 
             drawLine(ld, upHatch);
-            drawString(new RealPoint(realPoint1.getX() - hatchSize, realPoint1.getY()), String.valueOf(i));
+            drawString(new RealPoint(realPoint1.getX() - hatchSize * 2, realPoint1.getY()), String.valueOf(Math.ceil(i * 1000) / 1000));
 
-            realPoint1 = new RealPoint(- hatchSize / 2, -i);
-            realPoint2 = new RealPoint( hatchSize / 2, -i);
+            realPoint1 = new RealPoint(-hatchSize / 2, -i);
+            realPoint2 = new RealPoint(hatchSize / 2, -i);
             Line downHatch = new Line(realPoint1, realPoint2);
 
             drawLine(ld, downHatch);
-            drawString(new RealPoint(realPoint1.getX() - hatchSize, realPoint1.getY()), String.valueOf(-i));
+            drawString(new RealPoint(realPoint1.getX() - hatchSize * 2, realPoint1.getY()), String.valueOf(-Math.ceil(i * 1000) / 1000));
         }
     }
 
@@ -105,6 +99,19 @@ public class DrawPanel extends JPanel implements MouseMotionListener, MouseListe
         ScreenPoint screenPoint = sc.r2s(realPoint);
         biGraphics.setColor(Color.BLACK);
         biGraphics.drawString(text, screenPoint.getX(), screenPoint.getY());
+    }
+
+    public void drawFunction(IFunction function, LineDrawer ld) {
+        double step = sc.getRealW() / sc.getScreenW();
+
+        double startX = -sc.getRealW() / 2;
+        RealPoint leftPoint = new RealPoint(startX, function.calculateY(startX));
+
+        for (double x = startX + step; x <= sc.getRealW() / 2; x += step) {
+            RealPoint rightPoint = new RealPoint(x, function.calculateY(x));
+            drawLine(ld, new Line(leftPoint, rightPoint));
+            leftPoint = rightPoint;
+        }
     }
 
     private ScreenPoint prevPoint = null;
